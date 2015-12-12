@@ -1,0 +1,33 @@
+<mtapp:setting
+    id="fastly_enabled"
+    label="<__trans phrase="Enabled">"
+>
+<input type="checkbox" id="fastly_enabled" name="fastly_enabled" value="1" <mt:If name="fastly_enabled"> checked="checked" </mt:If> />
+</mtapp:setting>
+
+<mtapp:setting
+    id="fastly_cname"
+    label="<__trans phrase="CNAME">"
+    hint="<__trans phrase="The CNAME of the this site.">"
+    show_hint="1"
+>
+<input type="input" id="fastly_cname" name="fastly_cname" value="<mt:Var name="fastly_cname" encode_html="1" />" class="text required" required="required" />
+</mtapp:setting>
+
+<mtapp:setting
+    id="fastly_additional_headers"
+    label="<__trans phrase="Request Headers">"
+    hint="<__trans phrase="The additional headers that will send with PURGE request.">"
+    show_hint="1"
+>
+<textarea id="fastly_additional_headers" name="fastly_additional_headers" class="text low"><mt:Var name="fastly_additional_headers" encode_html="1" /></textarea>
+</mtapp:setting>
+
+<mtapp:setting
+    id="fastly_wait_for_preview"
+    label="<__trans phrase="Wait For Preview">"
+    hint="<__trans phrase="Wait (N) seconds after purging for preview.">"
+    show_hint="1"
+>
+<input type="input" id="fastly_wait_for_preview" name="fastly_wait_for_preview" value="<mt:Var name="fastly_wait_for_preview" __default="0" />" class="text required" required="required" />
+</mtapp:setting>

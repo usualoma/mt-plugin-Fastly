@@ -1,0 +1,41 @@
+id: Fastly
+name: Fastly
+version: 0.0.1
+
+description: <__trans phrase="Provides function set for the Fastly API. Purge the updated content and enable ESI include via include tag.">
+author_name: <__trans phrase="TaaaS">
+author_link: http://blog.taaas.jp/
+plugin_link: http://blog.taaas.jp/mt/fastly/
+
+l10n_lexicon:
+  ja:
+    Provides function set for the Fastly API. Purge the updated content and enable ESI include via include tag.: "Fastlyに対して更新されたコンテンツのPURGEリクエストを送信します。またモジュールのESIインクルードも可能になります。"
+    Edge Side Includes: "Edge Side Includes"
+    CNAME: "CNAME"
+    The CNAME of the this site.: "このサイトに設定したCNAME."
+    Request Headers: "リクエストヘッダー"
+    The additional headers that will send with PURGE request.: "PURGEリクエスト送信時に送信するリクエストヘッダー"
+    Wait For Preview: "プレビュー前の待ち時間"
+    Wait (N) seconds after purging for preview.: "プレビュー時のPURGEリクエストを送った際に指定した秒数だけ待ちます。プレビューがうまく更新されない場合には 0.1 などを指定してください。"
+
+settings:
+  fastly_enabled: 
+    Default: 0
+  fastly_cname:
+    Default: global.prod.fastly.net
+  fastly_additional_headers:
+    Default: "X-Purge-Auth: xxxxxxxx"
+  fastly_wait_for_preview:
+    Default: 0
+  fastly_debug_mode:
+    Default: 0
+
+blog_config_template: fastly_blog_config.tmpl
+
+callbacks:
+  init_app: $Fastly::MT::Plugin::Fastly::init_app
+  build_file: $Fastly::MT::Plugin::Fastly::build_file
+  build_dynamic: $Fastly::MT::Plugin::Fastly::build_file
+  cms_upload_file: $Fastly::MT::Plugin::Fastly::cms_upload_file
+  post_run: $Fastly::MT::Plugin::Fastly::post_run
+  MT::App::CMS::template_source.cfg_prefs: $Fastly::MT::Plugin::Fastly::template_source_cfg_prefs
