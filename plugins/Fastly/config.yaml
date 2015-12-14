@@ -55,6 +55,8 @@ callbacks:
   post_run: $Fastly::MT::Plugin::Fastly::post_run
   MT::App::CMS::template_source.cfg_prefs: $Fastly::MT::Plugin::Fastly::template_source_cfg_prefs
   pre_save: $Fastly::MT::Plugin::Fastly::pre_save_object
-  cms_delete_permission_filter.asset: $Fastly::MT::Plugin::Fastly::permission_filter_asset
   MT::FileInfo::pre_remove: $Fastly::MT::Plugin::Fastly::pre_remove_fileinfo
   MT::Session::pre_remove: $Fastly::MT::Plugin::Fastly::pre_remove_session
+  api_delete_permission_filter.asset: $Fastly::MT::Plugin::Fastly::permission_filter_asset
+  data_api_delete_permission_filter.asset: $Fastly::MT::Plugin::Fastly::permission_filter_asset
+  cms_delete_permission_filter.asset: $Fastly::MT::Plugin::Fastly::permission_filter_asset
