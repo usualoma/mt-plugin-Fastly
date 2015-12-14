@@ -1,6 +1,6 @@
 id: Fastly
 name: Fastly
-version: 0.0.1
+version: 0.0.2
 
 description: <__trans phrase="Provides function set for the Fastly API. Purge cache of the updated content and enable ESI via include tag.">
 author_name: <__trans phrase="TaaaS">
