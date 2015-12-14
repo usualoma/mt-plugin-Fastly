@@ -2,21 +2,30 @@ id: Fastly
 name: Fastly
 version: 0.0.1
 
-description: <__trans phrase="Provides function set for the Fastly API. Purge the updated content and enable ESI include via include tag.">
+description: <__trans phrase="Provides function set for the Fastly API. Purge cache of the updated content and enable ESI via include tag.">
 author_name: <__trans phrase="TaaaS">
 author_link: http://blog.taaas.jp/
 plugin_link: http://blog.taaas.jp/mt/fastly/
 
 l10n_lexicon:
   ja:
-    Provides function set for the Fastly API. Purge the updated content and enable ESI include via include tag.: "Fastlyに対して更新されたコンテンツのPURGEリクエストを送信します。またモジュールのESIインクルードも可能になります。"
+    Provides function set for the Fastly API. Purge cache of the updated content and enable ESI via include tag.: "コンテンツの更新に対応して Fastly のキャッシュをクリアします。またサーバーサイドインクルードで ESI を利用できるようになります。"
     Edge Side Includes: "Edge Side Includes"
     CNAME: "CNAME"
     The CNAME of the this site.: "このサイトに設定したCNAME."
     Request Headers: "リクエストヘッダー"
     The additional headers that will send with PURGE request.: "PURGEリクエスト送信時に送信するリクエストヘッダー"
     Wait For Preview: "プレビュー前の待ち時間"
-    Wait (N) seconds after purging for preview.: "プレビュー時のPURGEリクエストを送った際に指定した秒数だけ待ちます。プレビューがうまく更新されない場合には 0.1 などを指定してください。"
+    Wait (N) seconds after purging for preview.: "プレビュー時のPURGEリクエストを送った際に指定した秒数だけ待ちます。プレビューがうまく更新されない場合には 0.1 などを指定してください"
+    Basic Settings: "基本設定"
+    Advanced Setting: "詳細設定"
+    These settings are required if you want to purge the cache of the Data API and the search result.: "Data API や検索結果のキャッシュをクリアする機能を利用するためには、以下の設定が必要です。"
+    API Key: "API キー"
+    You should add API key of your account of the fastly to mt-config.cgi as a FastlyAPIKey in order to use these feature.: "mt-config.cgi に FastlyAPIKey という名前で Fastly の API キーを登録してください。"
+    Service ID: Service
+    The ID of the service at the fastly.: Fastly の Service の ID
+    Surrogate Keys: サロゲートキー
+    The surrogate-keys that is sent via purge requests after some object is updated. You can purge the cache of the Data API and the search result via mt-plugin-Fastly-dynamic.: オブジェクトが更新された時に、ここで指定したキーに PURGE リクエストを送信します。デフォルトの mt-plugin-Fastly-dynamic では Data API と検索結果が PURGE されます。
 
 settings:
   fastly_enabled: 
@@ -24,7 +33,11 @@ settings:
   fastly_cname:
     Default: global.prod.fastly.net
   fastly_additional_headers:
-    Default: "X-Purge-Auth: xxxxxxxx"
+    Default: "X-Purge-Auth: your-auth-key"
+  fastly_service_id:
+    Default: ""
+  fastly_surrogate_keys:
+    Default: "mt-plugin-Fastly-dynamic"
   fastly_wait_for_preview:
     Default: 0
   fastly_debug_mode:
@@ -33,9 +46,15 @@ settings:
 blog_config_template: fastly_blog_config.tmpl
 
 callbacks:
-  init_app: $Fastly::MT::Plugin::Fastly::init_app
+  MT::App::CMS::init_app: $Fastly::MT::Plugin::Fastly::cms_init_app
+  MT::App::Search::init_app: $Fastly::MT::Plugin::Fastly::search_init_app
+  MT::App::DataAPI::init_app: $Fastly::MT::Plugin::Fastly::data_api_init_app
   build_file: $Fastly::MT::Plugin::Fastly::build_file
   build_dynamic: $Fastly::MT::Plugin::Fastly::build_file
   cms_upload_file: $Fastly::MT::Plugin::Fastly::cms_upload_file
   post_run: $Fastly::MT::Plugin::Fastly::post_run
   MT::App::CMS::template_source.cfg_prefs: $Fastly::MT::Plugin::Fastly::template_source_cfg_prefs
+  pre_save: $Fastly::MT::Plugin::Fastly::pre_save_object
+  cms_delete_permission_filter.asset: $Fastly::MT::Plugin::Fastly::permission_filter_asset
+  MT::FileInfo::pre_remove: $Fastly::MT::Plugin::Fastly::pre_remove_fileinfo
+  MT::Session::pre_remove: $Fastly::MT::Plugin::Fastly::pre_remove_session

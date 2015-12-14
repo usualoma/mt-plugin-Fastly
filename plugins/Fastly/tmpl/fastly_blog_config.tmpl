@@ -5,6 +5,9 @@
 <input type="checkbox" id="fastly_enabled" name="fastly_enabled" value="1" <mt:If name="fastly_enabled"> checked="checked" </mt:If> />
 </mtapp:setting>
 
+<mtapp:settinggroup id="fastly-basic-settings">
+<h2><__trans phrase="Basic Settings"></h2>
+
 <mtapp:setting
     id="fastly_cname"
     label="<__trans phrase="CNAME">"
@@ -31,3 +34,42 @@
 >
 <input type="input" id="fastly_wait_for_preview" name="fastly_wait_for_preview" value="<mt:Var name="fastly_wait_for_preview" __default="0" />" class="text required" required="required" />
 </mtapp:setting>
+
+</mtapp:settinggroup>
+
+<mtapp:settinggroup id="fastly-advanced-settings">
+<h2><__trans phrase="Advanced Setting"></h2>
+
+<p>
+<__trans phrase="These settings are required if you want to purge the cache of the Data API and the search result.">
+</p>
+
+<mtapp:setting
+    id="fastly_api_key"
+    label="<__trans phrase="API Key">"
+    show_hint="1"
+>
+<p>
+<__trans phrase="You should add API key of your account of the fastly to mt-config.cgi as a FastlyAPIKey in order to use these feature.">
+</p>
+</mtapp:setting>
+
+<mtapp:setting
+    id="fastly_service_id"
+    label="<__trans phrase="Service ID">"
+    hint="<__trans phrase="The ID of the service at the fastly.">"
+    show_hint="1"
+>
+<input type="input" id="fastly_service_id" name="fastly_service_id" value="<mt:Var name="fastly_service_id" encode_html="1" />" class="text required" required="required" />
+</mtapp:setting>
+
+<mtapp:setting
+    id="fastly_surrogate_keys"
+    label="<__trans phrase="Surrogate Keys">"
+    hint="<__trans phrase="The surrogate-keys that is sent via purge requests after some object is updated. You can purge the cache of the Data API and the search result via mt-plugin-Fastly-dynamic.">"
+    show_hint="1"
+>
+<textarea id="fastly_surrogate_keys" name="fastly_surrogate_keys" class="text low"><mt:Var name="fastly_surrogate_keys" encode_html="1" /></textarea>
+</mtapp:setting>
+
+</mtapp:settinggroup>
