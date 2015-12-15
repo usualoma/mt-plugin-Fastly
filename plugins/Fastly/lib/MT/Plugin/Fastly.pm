@@ -369,7 +369,10 @@ sub data_api_init_app {
             $orig->(@_);
 
             my $user = $app->authenticate;
-            if (!$user && !$user->is_anonymous) {
+            if (
+                (lc $app->request_method ne 'get') 
+                || ($user && !$user->is_anonymous)
+            ) {
                 $app->set_header('Cache-Control' => 'private, no-cache');
             }
 
