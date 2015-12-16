@@ -72,4 +72,13 @@
 <textarea id="fastly_surrogate_keys" name="fastly_surrogate_keys" class="text low"><mt:Var name="fastly_surrogate_keys" encode_html="1" /></textarea>
 </mtapp:setting>
 
+<mtapp:setting
+    id="fastly_async_purge_surrogate_keys"
+    label="<__trans phrase="Purge Surrogate Keys Asynchronously">"
+    hint="<__trans phrase="Send a purege requet to the falstly via background task. You should run tools/run-periodic-tasks for using this feature.">"
+    show_hint="1"
+>
+<input type="checkbox" id="fastly_async_purge_surrogate_keys" name="fastly_async_purge_surrogate_keys" value="1" <mt:If name="fastly_async_purge_surrogate_keys"> checked="checked" </mt:If> />
+</mtapp:setting>
+
 </mtapp:settinggroup>

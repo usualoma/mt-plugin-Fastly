@@ -26,6 +26,8 @@ l10n_lexicon:
     The ID of the service at the fastly.: Fastly の Service の ID
     Surrogate Keys: サロゲートキー
     The surrogate-keys that is sent via purge requests after some object is updated. You can purge the cache of the Data API and the search result via mt-plugin-Fastly-dynamic.: オブジェクトが更新された時に、ここで指定したキーに PURGE リクエストを送信します。デフォルトの mt-plugin-Fastly-dynamic では Data API と検索結果が PURGE されます。
+    Purge Surrogate Keys Asynchronously: "非同期に実行"
+    Send a purege requet to the falstly via background task. You should run tools/run-periodic-tasks for using this feature.: "サロゲートキーによる PURGE リクエストを非同期に実行します。この機能を利用するためには tools/run-periodic-tasks を実行する必要があります"
 
 settings:
   fastly_enabled: 
@@ -34,11 +36,13 @@ settings:
     Default: global.prod.fastly.net
   fastly_additional_headers:
     Default: "X-Purge-Auth: your-auth-key"
+  fastly_wait_for_preview:
+    Default: 0
   fastly_service_id:
     Default: ""
   fastly_surrogate_keys:
     Default: "mt-plugin-Fastly-dynamic"
-  fastly_wait_for_preview:
+  fastly_async_purge_surrogate_keys:
     Default: 0
   fastly_debug_mode:
     Default: 0
@@ -60,3 +64,8 @@ callbacks:
   api_delete_permission_filter.asset: $Fastly::MT::Plugin::Fastly::permission_filter_asset
   data_api_delete_permission_filter.asset: $Fastly::MT::Plugin::Fastly::permission_filter_asset
   cms_delete_permission_filter.asset: $Fastly::MT::Plugin::Fastly::permission_filter_asset
+
+task_workers:
+  plugin_falstly_purge_by_surrogate_key:
+    label: "Purge the cache of the falstly by surrogate keys"
+    class: "MT::Plugin::Fastly::Worker::PurgeBySurrogateKey"

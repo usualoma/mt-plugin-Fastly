@@ -43,6 +43,11 @@ sub surrogate_keys {
     [ grep { $_ } split(/\s+/sm, $keys_str) ];
 }
 
+sub async_purge_surrogate_keys {
+    my ($blog) = @_;
+    plugin()->get_config_value('fastly_async_purge_surrogate_keys', 'blog:' . $blog->id);
+}
+
 sub service_id {
     my ($blog) = @_;
     plugin()->get_config_value('fastly_service_id', 'blog:' . $blog->id);
@@ -68,40 +73,48 @@ sub debug_mode {
 }
 
 sub error_log {
+    my ($blog, $message) = @_;
+
     MT->instance->log({
-        message => shift,
+        blog_id => $blog->id,
+        message => $message,
         level   => MT->model('log')->ERROR,
     });
 }
 
 sub debug_log {
+    my ($blog, $message) = @_;
+
     MT->instance->log({
-        message => shift,
+        blog_id => $blog->id,
+        message => $message,
         level   => MT->model('log')->DEBUG,
     });
 }
 
 sub send_instant_purge_request {
-    my ($host, $url, $headers) = @_;
+    my ($blog, $host, $url) = @_;
 
     my $req = HTTP::Request->new(PURGE => $url);
     $req->header('Host' => $host);
+
+    my $headers = additional_headers($blog);
     for my $k (%$headers) {
         $req->header($k => $headers->{$k});
     }
 
     if (debug_mode()) {
-        debug_log("PURGE Host: $host URL: $url");
+        debug_log($blog, "PURGE Host: $host URL: $url");
     }
 
     my $ua  = MT->new_ua;
     my $res = $ua->request($req);
 
     unless ($res->is_success) {
-        error_log($res->status_line);
+        error_log($blog, $res->status_line);
     }
     elsif (debug_mode()) {
-        debug_log($res->decoded_content);
+        debug_log($blog, $res->decoded_content);
     }
 }
 
@@ -110,23 +123,24 @@ sub instant_purge {
 
     my $uri     = URI->new($url);
     my $host    = $uri->host;
-    my $headers = additional_headers($blog);
 
     for my $u (@{cache_server_uris($blog)}) {
         $uri->host($u->host);
         $uri->scheme($u->scheme);
 
         my $uri_str = $uri->as_string;
-        send_instant_purge_request($host, $uri_str, $headers);
+        send_instant_purge_request($blog, $host, $uri_str);
 
         my $stripped_uri_str = MT::Util::strip_index($uri_str, $blog);
-        send_instant_purge_request($host, $stripped_uri_str, $headers) if $stripped_uri_str ne $uri_str;
+        send_instant_purge_request($blog, $host, $stripped_uri_str) if $stripped_uri_str ne $uri_str;
     }
 }
 
 sub send_purge_by_surrogate_key_request {
-    my ($service_id, $surrogate_key) = @_;
+    my ($blog, $surrogate_key) = @_;
 
+    my $service_id = service_id($blog)
+        or return 1;
     my $api_key = MT->config->FastlyAPIKey
         or return 1;
 
@@ -136,39 +150,48 @@ sub send_purge_by_surrogate_key_request {
     $req->header('Fastly-Key' => $api_key);
 
     if (debug_mode()) {
-        debug_log('PURGE Surrogate Key: ' . $surrogate_key);
+        debug_log($blog, 'PURGE Surrogate Key: ' . $surrogate_key);
     }
 
     my $ua  = MT->new_ua;
     my $res = $ua->request($req);
 
     unless ($res->is_success) {
-        error_log($res->status_line);
+        error_log($blog, $res->status_line);
     }
     elsif (debug_mode()) {
-        debug_log($res->decoded_content);
+        debug_log($blog, $res->decoded_content);
     }
 }
 
 sub purge_by_surrogate_key {
     my ($blog) = @_;
 
-    my $service_id = service_id($blog)
-        or return 1;
-
     for my $k (@{surrogate_keys($blog)}) {
-        send_purge_by_surrogate_key_request($service_id, $k);
+        send_purge_by_surrogate_key_request($blog, $k);
     }
 }
 
 sub add_url {
     my ($blog, $url) = @_;
+
+    if (ref(MT->instance) eq 'MT') {
+        instant_purge($blog, $url);
+        return;
+    }
+
     my $map = MT->request('FastlyPurgeURLs') || MT->request('FastlyPurgeURLs', {});
     $map->{$url} = {blog => $blog};
 }
 
 sub add_blog {
     my ($blog) = @_;
+
+    if (ref(MT->instance) eq 'MT') {
+        purge_by_surrogate_key($blog);
+        return;
+    }
+
     my $map = MT->request('FastlyPurgeBlogs') || MT->request('FastlyPurgeBlogs', {});
     $map->{$blog->id} = {blog => $blog};
 }
@@ -290,6 +313,9 @@ sub post_run {
 
     my $map = MT->request('FastlyPurgeURLs');
     if ($map) {
+        require MT::TheSchwartz;
+        require TheSchwartz::Job;
+
         for my $url (keys %$map) {
             instant_purge($map->{$url}{blog}, $url);
         }
@@ -297,8 +323,20 @@ sub post_run {
 
     my $blog_map = MT->request('FastlyPurgeBlogs');
     if ($blog_map) {
+        require MT::TheSchwartz;
+        require TheSchwartz::Job;
+
         for my $data (values %$blog_map) {
-            purge_by_surrogate_key($data->{blog});
+            if (async_purge_surrogate_keys($data->{blog})) {
+                my $job = TheSchwartz::Job->new(
+                    funcname => 'MT::Plugin::Fastly::Worker::PurgeBySurrogateKey',
+                    uniqkey  => $data->{blog}->id,
+                );
+                MT::TheSchwartz->insert($job);
+            }
+            else {
+                purge_by_surrogate_key($data->{blog});
+            }
         }
     }
 
