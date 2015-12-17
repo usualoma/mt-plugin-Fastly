@@ -11,8 +11,10 @@ l10n_lexicon:
   ja:
     Provides function set for the Fastly API. Purge cache of the updated content and enable ESI via include tag.: "コンテンツの更新に対応して Fastly のキャッシュをクリアします。またサーバーサイドインクルードで ESI を利用できるようになります。"
     Edge Side Includes: "Edge Side Includes"
+    Hostname: "ブログのホスト名"
+    The hostname of this site. The hostname of this blog is used, in case of a blank, so you need not usually fill in this field. You can use this field for testing.: "空欄の場合はブログのホスト名が使われるので、通常は入力する必要はありません。CNAME を設定せずにテストを行う場合に利用できます。"
     CNAME: "CNAME"
-    The CNAME of the this site.: "このサイトに設定したCNAME."
+    The CNAME of this site.: "このサイトに設定したCNAME."
     Request Headers: "リクエストヘッダー"
     The additional headers that will send with PURGE request.: "PURGEリクエスト送信時に送信するリクエストヘッダー"
     Wait For Preview: "プレビュー前の待ち時間"
@@ -32,6 +34,8 @@ l10n_lexicon:
 settings:
   fastly_enabled: 
     Default: 0
+  fastly_hostname:
+    Default: ""
   fastly_cname:
     Default: global.prod.fastly.net
   fastly_additional_headers:

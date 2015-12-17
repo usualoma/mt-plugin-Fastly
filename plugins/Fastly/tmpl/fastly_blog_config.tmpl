@@ -11,7 +11,7 @@
 <mtapp:setting
     id="fastly_cname"
     label="<__trans phrase="CNAME">"
-    hint="<__trans phrase="The CNAME of the this site.">"
+    hint="<__trans phrase="The CNAME of this site.">"
     show_hint="1"
 >
 <input type="input" id="fastly_cname" name="fastly_cname" value="<mt:Var name="fastly_cname" encode_html="1" />" class="text required" required="required" />
@@ -33,6 +33,15 @@
     show_hint="1"
 >
 <input type="input" id="fastly_wait_for_preview" name="fastly_wait_for_preview" value="<mt:Var name="fastly_wait_for_preview" __default="0" />" class="text required" required="required" />
+</mtapp:setting>
+
+<mtapp:setting
+    id="fastly_hostname"
+    label="<__trans phrase="Hostname">"
+    hint="<__trans phrase="The hostname of this site. The hostname of this blog is used, in case of a blank, so you need not usually fill in this field. You can use this field for testing.">"
+    show_hint="1"
+>
+<input type="input" id="fastly_hostname" name="fastly_hostname" value="<mt:Var name="fastly_hostname" encode_html="1" />" class="text" />
 </mtapp:setting>
 
 </mtapp:settinggroup>

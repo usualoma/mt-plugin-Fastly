@@ -22,6 +22,11 @@ sub enabled {
     plugin()->get_config_value('fastly_enabled', 'blog:' . $blog->id);
 }
 
+sub hostname {
+    my ($blog) = @_;
+    plugin()->get_config_value('fastly_hostname', 'blog:' . $blog->id);
+}
+
 sub cname {
     my ($blog) = @_;
     plugin()->get_config_value('fastly_cname', 'blog:' . $blog->id);
@@ -121,8 +126,8 @@ sub send_instant_purge_request {
 sub instant_purge {
     my ($blog, $url) = @_;
 
-    my $uri     = URI->new($url);
-    my $host    = $uri->host;
+    my $uri  = URI->new($url);
+    my $host = hostname($blog) || $uri->host;
 
     for my $u (@{cache_server_uris($blog)}) {
         $uri->host($u->host);
